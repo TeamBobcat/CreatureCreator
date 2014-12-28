@@ -140,15 +140,15 @@ public class BodyPart : MonoBehaviour
     {
        
             #region Vertices_
-        Vector3 p0 = new Vector3(position.x + x_size - 0.1f, position.y, position.z + 0.1f);
-        Vector3 p1 = new Vector3(position.x + 0.1f, position.y, position.z + 0.1f);
-        Vector3 p2 = new Vector3(position.x + 0.1f, position.y, position.z + z_size - 0.1f);
-        Vector3 p3 = new Vector3(position.x + x_size - 0.1f, position.y, position.z + z_size - 0.1f);
+        Vector3 p0 = new Vector3(position.x + x_size, position.y, position.z);
+        Vector3 p1 = new Vector3(position.x, position.y, position.z);
+        Vector3 p2 = new Vector3(position.x, position.y, position.z + z_size);
+        Vector3 p3 = new Vector3(position.x + x_size, position.y, position.z + z_size);
 
-        Vector3 p4 = new Vector3(position.x + x_size, position.y + y_size, position.z);
-        Vector3 p5 = new Vector3(position.x, position.y + y_size, position.z);
-        Vector3 p6 = new Vector3(position.x, position.y + y_size, position.z + z_size);
-        Vector3 p7 = new Vector3(position.x + x_size, position.y + y_size, position.z + z_size);
+        Vector3 p4 = new Vector3(position.x + x_size + 0.1f, position.y + y_size, position.z - 0.1f);
+        Vector3 p5 = new Vector3(position.x - 0.1f , position.y + y_size, position.z - 0.1f);
+        Vector3 p6 = new Vector3(position.x - 0.1f, position.y + y_size, position.z + z_size + 0.1f);
+        Vector3 p7 = new Vector3(position.x + x_size + 0.1f, position.y + y_size, position.z + z_size + 0.1f);
 
             Vector3[] vertices = new Vector3[]
 {

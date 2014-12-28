@@ -5,12 +5,8 @@ public class Creature : BodyPart
 {
    
     Vector3 position;
-    Rigidbody rigid;
-    BoxCollider collider;
 
     Mesh body_part = new Mesh();
-    
-
 
     // Use this for initialization
     void Start()
@@ -23,9 +19,22 @@ public class Creature : BodyPart
         load_tail(parent, 4);
         //  load_wings();
 
-     //  rigid = parent.AddComponent<Rigidbody>();
-      // collider = parent.AddComponent<BoxCollider>();
 
+        GameObject left_leg = GameObject.Find("Legs/Left Leg");
+        GameObject left_lower_torso = GameObject.Find("Body/Lower Torso/Segment: 3");
+        Bounds left_torso_bounds = left_lower_torso.transform.renderer.bounds;
+        Vector3 left_leg_position = new Vector3(left_torso_bounds.min.x, left_torso_bounds.min.y - 2.0f, 0.1f);
+        left_leg.transform.position =  left_leg_position;
+
+        GameObject right_leg = GameObject.Find("Legs/Right Leg");
+        GameObject right_lower_torso = GameObject.Find("Body/Lower Torso/Segment: 1");
+        Bounds right_torso_bounds = right_lower_torso.transform.renderer.bounds;
+        Vector3 right_leg_position = new Vector3(right_torso_bounds.min.x, right_torso_bounds.min.y - 2.0f, 0.1f);
+        right_leg.transform.position = right_leg_position;
+
+       
+      //  GameObject left_thigh = GameObject.Find("Left Leg/Segment: 2");
+      
     }
 
     void load_legs(GameObject obj, int number_of_segments)
@@ -68,7 +77,7 @@ public class Creature : BodyPart
 
                 if (j == 1)
                 {
-                    create_thigh(position, body_part, 0.5f, 1.0f, 0.5f);
+                    create_thigh(position, body_part, 0.3f, 1.0f, 0.3f);
                 }
 
                 body_part.RecalculateBounds();
@@ -83,7 +92,6 @@ public class Creature : BodyPart
         GameObject shin = GameObject.Find("Left Leg/Segment: 1");
         GameObject left_thigh = GameObject.Find("Left Leg/Segment: 2");
       
-       // shin.transform.position = left_thigh.renderer.bounds.max;
     }
 
     void load_body(GameObject obj, int number_of_segments)
@@ -272,11 +280,7 @@ public class Creature : BodyPart
 
     void Update()
     {
-        Vector3 jump = new Vector3 (0.0f, 100.0f, 0.0f);
-        if (Input.GetKeyDown("space"))
-        {
-            rigid.AddForce(jump);
-        }
+ 
 	}
  }
 

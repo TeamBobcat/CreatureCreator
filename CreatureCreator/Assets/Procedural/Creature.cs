@@ -15,8 +15,9 @@ public class Creature : BodyPart
         load_legs(parent, 2);
         load_body(parent, 3);
         load_arms(parent, 2);
-        load_neck(parent, 2);
+        load_neck(parent, 5);
         load_tail(parent, 4);
+        load_head(parent);
         //  load_wings();
 
 
@@ -32,9 +33,7 @@ public class Creature : BodyPart
         Vector3 right_leg_position = new Vector3(right_torso_bounds.min.x, right_torso_bounds.min.y - 2.0f, 0.1f);
         right_leg.transform.position = right_leg_position;
 
-       
-      //  GameObject left_thigh = GameObject.Find("Left Leg/Segment: 2");
-      
+
     }
 
     void load_legs(GameObject obj, int number_of_segments)
@@ -72,12 +71,12 @@ public class Creature : BodyPart
                       
                 if (j == 0)
                 {
-                    create_bone(position, body_part, 0.3f, 1.0f, 0.3f);
+                    create_bone(position, body_part, 0.2f, 1.0f, 0.2f);
                 }
 
                 if (j == 1)
                 {
-                    create_thigh(position, body_part, 0.3f, 1.0f, 0.3f);
+                    create_thigh(position, body_part, 0.2f, 1.0f, 0.2f);
                 }
 
                 body_part.RecalculateBounds();
@@ -89,9 +88,6 @@ public class Creature : BodyPart
             position.x += 0.5f;
         }
 
-        GameObject shin = GameObject.Find("Left Leg/Segment: 1");
-        GameObject left_thigh = GameObject.Find("Left Leg/Segment: 2");
-      
     }
 
     void load_body(GameObject obj, int number_of_segments)
@@ -102,6 +98,7 @@ public class Creature : BodyPart
 
         GameObject section = gameObject;
         int number_of_sections = 3; //upper, mid, lower torso
+        float size = 0.0f;
 
         for (int i = 0; i < number_of_sections; i++)
         {
@@ -110,18 +107,23 @@ public class Creature : BodyPart
             {
                 section = new GameObject("Lower Torso");
                 section.transform.parent = body.transform;
+                size = 0.5f;
             }
 
             if (i == 1)
             {
                 section = new GameObject("Mid Torso");
                 section.transform.parent = body.transform;
+                position.x -= 0.15f;
+                size = 0.8f;
             }
 
             if (i == 2)
             {
                 section = new GameObject("Upper Torso");
                 section.transform.parent = body.transform;
+                size = 0.5f;
+
             }
 
             for (int j = 0; j < number_of_segments; j++)
@@ -129,19 +131,34 @@ public class Creature : BodyPart
                 GameObject segment = new GameObject("Segment: " + (j + 1));
                 segment.transform.parent = section.transform;
                 create_mesh(segment);
-                create_bone(position, body_part, 0.5f, 1.0f, 0.5f);
+                if (j == 0)
+                {
+                    create_body(position, body_part, size, 1.0f, size);
+                }
+
+                if (j == 1)
+                {
+                    
+                    create_left_side(position, body_part, 0.2f, 1.0f, 0.5f);
+                }
+
+                if (j == 2)
+                {
+                    create_right_side(position, body_part, 0.2f, 1.0f, 0.5f);
+
+                }
 
                 body_part.RecalculateBounds();
                 body_part.Optimize();
 
                 if (j == 0) { 
            
-                    position.x += 0.5f;
+                    position.x += size + 0.1f;
                 
                 }
                 else if (j == 1)
                 {
-                    position.x -= 0.5f * 2;
+                    position.x -= size +0.4f;
                 }
             }
             position.x = 0.1f;
@@ -152,9 +169,9 @@ public class Creature : BodyPart
     void load_arms(GameObject obj, int number_of_segments)
     {
 
-        GameObject right_upper_torso = GameObject.Find("Mid Torso/Segment: 3");
-        GameObject left_upper_torso = GameObject.Find("Mid Torso/Segment: 2");
-        position.y = right_upper_torso.renderer.bounds.max.y;
+        GameObject right_upper_torso = GameObject.Find("Upper Torso/Segment: 3");
+        GameObject left_upper_torso = GameObject.Find("Upper Torso/Segment: 2");
+        position.y = (right_upper_torso.renderer.bounds.max.y + right_upper_torso.renderer.bounds.min.y)/2;
         
 
         GameObject arms = new GameObject("Arms");
@@ -168,17 +185,17 @@ public class Creature : BodyPart
 
             if (i == 0)
             {
-                section = new GameObject("Right arm");
+                section = new GameObject("Left arm");
                 section.transform.parent = arms.transform;
-                position.x = right_upper_torso.renderer.bounds.min.x;
+                position.x = left_upper_torso.renderer.bounds.max.x + 1.0f;
 
             }
 
             if (i == 1)
             {
-                section = new GameObject("Left Arm");
+                section = new GameObject("Right Arm");
                 section.transform.parent = arms.transform;
-                position.x = left_upper_torso.renderer.bounds.max.x;
+                position.x = right_upper_torso.renderer.bounds.min.x;
             }
 
 
@@ -186,26 +203,40 @@ public class Creature : BodyPart
             {
                 GameObject segment = new GameObject("Segment: " + (j + 1));
                 segment.transform.parent = section.transform;
-                if (i == 0)
+                if (j == 0)
                 {
                     create_mesh(segment);
-                    create_bone(position, body_part, -1.0f, 0.2f, 0.2f);
-
+                    if (i == 0)
+                    {
+                        create_left_bicep(position, body_part, -1.0f, 0.2f, 0.2f);
+                    }
+                    if (i == 1)
+                    {
+                        create_right_bicep(position, body_part, -1.0f, 0.2f, 0.2f);
+                 
+                    }
                     body_part.RecalculateBounds();
-                    body_part.Optimize();
-
-                    position.x = body_part.bounds.min.x;
+                    body_part.Optimize();     
                 }
 
-                if (i == 1)
+                if (j == 1)
                 {
                     create_mesh(segment);
                     create_bone(position, body_part, 1.0f, 0.2f, 0.2f);
 
                     body_part.RecalculateBounds();
                     body_part.Optimize();
+   
+                }
 
-                    position.x = body_part.bounds.max.x;
+                if (i == 0)
+                {
+                position.x = body_part.bounds.max.x;
+                }
+
+                if (i == 1)
+                {
+                position.x = body_part.bounds.min.x - 1.0f;
                 }
             }            
 
@@ -216,7 +247,8 @@ public class Creature : BodyPart
     {
         GameObject mid_upper_torso = GameObject.Find("Upper Torso/Segment: 1");
         position.y = mid_upper_torso.renderer.bounds.max.y;
-        position.x = mid_upper_torso.renderer.bounds.min.x;
+        position.x = 0.3f;
+        position.z = (mid_upper_torso.renderer.bounds.max.z + mid_upper_torso.renderer.bounds.min.z) / 2;
 
         GameObject neck = new GameObject("Neck");
         neck.transform.parent = obj.transform;
@@ -227,7 +259,7 @@ public class Creature : BodyPart
                 segment.transform.parent = neck.transform;
             
                 create_mesh(segment);
-                create_bone(position, body_part, 0.5f, 0.2f, 0.5f);
+                create_bone(position, body_part, 0.1f, 0.1f, 0.1f);
 
                 body_part.RecalculateBounds();
                 body_part.Optimize();
@@ -239,9 +271,9 @@ public class Creature : BodyPart
     void load_tail(GameObject obj, int number_of_segments)
     {
         GameObject mid_lower_torso = GameObject.Find("Lower Torso/Segment: 1");
-        position.y = mid_lower_torso.renderer.bounds.min.y;
-        position.x = mid_lower_torso.renderer.bounds.min.x;
-        position.z = mid_lower_torso.renderer.bounds.min.z;
+        position.y = (mid_lower_torso.renderer.bounds.max.y + mid_lower_torso.renderer.bounds.min.y) / 2;
+        position.x = (mid_lower_torso.renderer.bounds.max.x + mid_lower_torso.renderer.bounds.min.x) / 2;
+        position.z = mid_lower_torso.renderer.bounds.max.z;
 
         GameObject tail = new GameObject("Tail");
         tail.transform.parent = obj.transform;
@@ -252,12 +284,30 @@ public class Creature : BodyPart
             segment.transform.parent = tail.transform;
 
             create_mesh(segment);
-            create_bone(position, body_part, 0.1f, 0.1f, -1.0f);
+            create_bone(position, body_part, 0.1f, 0.1f, 1.0f);
 
             body_part.RecalculateBounds();
             body_part.Optimize();
-            position.z = body_part.bounds.min.z;
+            position.z = body_part.bounds.max.z;
         }   
+    }
+
+    void load_head(GameObject obj)
+    {
+        GameObject neck = GameObject.Find("Neck/Segment: 4");
+        position.y = neck.renderer.bounds.max.y;
+        position.x = 0.2f;
+        position.z = neck.renderer.bounds.max.z;
+
+        GameObject head = new GameObject("Head");
+        head.transform.parent = obj.transform;
+
+        create_mesh(head);
+        create_head(position, body_part, 0.3f, 0.2f, -1.0f);
+
+        body_part.RecalculateBounds();
+        body_part.Optimize();
+
     }
 
 

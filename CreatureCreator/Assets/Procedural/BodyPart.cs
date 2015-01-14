@@ -579,11 +579,13 @@ public class BodyPart : MonoBehaviour
     // Top
 	p7, p6, p5, p4,
 
+	//arch front
+	p6, p7, p8, p9,
+
 	// Back
 	p6, p7, p3, p2,
 
-  //arch front
-    p6, p7, p8, p9,
+ 
 };
        #endregion
 
@@ -597,38 +599,39 @@ public class BodyPart : MonoBehaviour
 
        Vector3[] normales = new Vector3[]
 {
-	// Bottom
-	down, down, down, down,
- 
-	// Left
-	left, left, left, left,
- 
-	// Front
-	front, front, front, front,
- 
-	// Back
-	back, back, back, back,
- 
-	// Right
-	right, right, right, right,
- 
-	// Top
-	up, up, up, up,
+			// Bottom
+			down, down, down, down,
+			
+			//arch back
+			down, down, down, down,
+			
+			// Right
+			right, right, right, right,
+			
+			//arch right
+			right, right, right, right,
+			
+			//arch top
+			up, up, up, up,
+			
+			//arch left
+			left, left, left, left,
+			
+			// Left
+			left, left, left, left,
+			
+			// Front
+			front, front, front, front,
+			
+			// Top
+			up, up, up, up,
+			
+			//arch front
+			front, front, front, front,
+			
+			// Back
+			back, back, back, back
 
-      //arch top
-    front, front, front, front,
-
-    //arch left
-    left, left, left, left,
-
-    //arch right
-    right, right, right, right,
- 
-    //arch front
-    up, up, up, up,
-
-    //arch back
-    down, down, down, down,
 };
        #endregion
 
@@ -675,8 +678,39 @@ public class BodyPart : MonoBehaviour
 {
 	// Bottom
 	3, 1, 0,
-	3, 2, 1,			
- 
+	3, 2, 1,
+	
+	7, 5, 4,
+	7, 6, 5,
+	
+	11, 9, 8,
+	11, 10, 9,
+
+	15, 13, 12,
+	15, 14, 13,
+			
+	19, 17, 16,
+	19, 18, 17,
+		
+	23, 21, 20,
+	23, 22, 21,
+
+	27, 25, 24,
+	27, 26, 25,
+
+	31, 29, 28,
+	31, 30, 29,
+			
+	35, 33, 32,
+	35, 34, 33,
+			
+	39, 37, 36,
+	39, 38, 37,
+
+	43, 42, 40,
+	43, 41, 42,
+
+ /*
 	// Left
 	3 + 4 * 1, 1 + 4 * 1, 0 + 4 * 1,
 	3 + 4 * 1, 2 + 4 * 1, 1 + 4 * 1,
@@ -716,7 +750,7 @@ public class BodyPart : MonoBehaviour
     //arch back
  	3 + 4 * 10, 1 + 4 * 10, 0 + 4 * 10,
 	3 + 4 * 10, 2 + 4 * 10, 1 + 4 * 10,
-
+*/
 };
        #endregion
 

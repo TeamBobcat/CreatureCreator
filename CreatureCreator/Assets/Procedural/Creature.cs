@@ -5,9 +5,12 @@ using System.Collections.Generic;
 public class Creature : BodyPart
 {
 	Mesh body_part = new Mesh();
-	
+	GameObject parent;
 	Vector3 position;
-	
+	Texture main_texture;
+	float move;
+
+
 	//Transform[] bones = new Transform[;
 	
 	// Use this for initialization
@@ -15,8 +18,14 @@ public class Creature : BodyPart
 	{
 		
 		List<Transform>Bones = new List<Transform>();
-		GameObject parent = GameObject.Find("Creature");
-		parent.AddComponent<Animation> ();
+		parent = GameObject.Find("Creature");
+	    Animator animator = parent.AddComponent<Animator> ();
+		//animator.applyRootMotion = true;
+		//animtor.
+		Animation animation = parent.AddComponent<Animation> ();
+		//animation.animatePhysics = true;
+		//animation.
+
 		load_legs(parent,Bones, 2);
 		load_body(parent,Bones, 3);
 		load_arms(parent,Bones, 2);
@@ -39,53 +48,150 @@ public class Creature : BodyPart
 		GameObject.Find ("right thigh").transform.parent = GameObject.Find ("hip bone").transform;
 		GameObject.Find ("left thigh").transform.parent = GameObject.Find ("hip bone").transform;
 		GameObject.Find ("head bone").transform.parent = GameObject.Find ("neck bone").transform;
-		GameObject.Find ("tail 1").transform.parent = GameObject.Find ("hip bone").transform;
+		GameObject.Find ("tail 1").transform.parent = GameObject.Find ("lower spine").transform;
 		GameObject.Find ("neck bone").transform.parent = GameObject.Find ("upper spine").transform;
 		
 		//animation
-
-
-		AnimationCurve left_leg_curve_z = new AnimationCurve ();
-		AnimationCurve left_leg_curve_y = new AnimationCurve ();
-		AnimationCurve left_leg_curve_x = new AnimationCurve ();
+		
+		AnimationCurve left_leg_curve_x;
 		AnimationCurve left_leg_curve_w = new AnimationCurve ();
-
-		AnimationCurve left_knee_curve_z = new AnimationCurve ();
-		AnimationCurve left_knee_curve_y = new AnimationCurve ();
-		AnimationCurve left_knee_curve_x = new AnimationCurve ();
+		
+		AnimationCurve left_knee_curve_x;
 		AnimationCurve left_knee_curve_w = new AnimationCurve ();
 
+		AnimationCurve right_leg_curve_x;
+		AnimationCurve right_leg_curve_w = new AnimationCurve ();
+
+		AnimationCurve right_knee_curve_x;
+		AnimationCurve right_knee_curve_w = new AnimationCurve ();
+
+		AnimationCurve body_curve_y;
+		AnimationCurve body_curve_w = new AnimationCurve ();
+
+		AnimationCurve left_arm_down_x;
+		AnimationCurve left_arm_down_w = new AnimationCurve ();
+
+		AnimationCurve left_arm_forward_x;
+		AnimationCurve left_arm_forward_w = new AnimationCurve ();
+
+		AnimationCurve right_arm_down_x;
+		AnimationCurve right_arm_down_w = new AnimationCurve ();
+		
+		AnimationCurve right_arm_forward_x;
+		AnimationCurve right_arm_forward_w = new AnimationCurve ();
+
+		Quaternion angle = Quaternion.Euler (45, 0, 0);
+		Quaternion twist_angle = Quaternion.Euler (0, 10, 0);
+		Quaternion arm_to_side_angle = Quaternion.Euler (0, 0, 90);
+
+
+		Keyframe[] left_leg = new Keyframe[3];
+		left_leg [0] = new Keyframe (0, 0, 0, 0);
+		left_leg [1] = new Keyframe (1, angle.x, 0, 0);
+		left_leg [2] = new Keyframe (3, 0, 0, 0);
+		left_leg_curve_x = new AnimationCurve (left_leg);
+
+		Keyframe[] left_knee = new Keyframe[4];
+		left_knee [0] = new Keyframe (0, 0, 0, 0);
+		left_knee [1] = new Keyframe (1, -angle.x, 0, 0);
+		left_knee [2] = new Keyframe (2, 0, 0, 0);
+		left_knee [3] = new Keyframe (3, 0, 0, 0);
+		left_knee_curve_x = new AnimationCurve (left_knee);
+		
+		Keyframe[] left_arm = new Keyframe[1];
+		left_arm [0] = new Keyframe (0, -arm_to_side_angle.z, 0, 0);
+		left_arm_down_x = new AnimationCurve (left_arm);
+
+		Keyframe[] swing_left_arm = new Keyframe[5];
+		swing_left_arm [0] = new Keyframe (0, 0, 0, 0);
+		swing_left_arm [1] = new Keyframe (1, angle.x, 0, 0);
+		swing_left_arm [2] = new Keyframe (3, 0, 0, 0);
+		swing_left_arm [3] = new Keyframe (4, -angle.x, 0, 0);
+		swing_left_arm [4] = new Keyframe (6, 0, 0, 0);
+		left_arm_forward_x = new AnimationCurve (swing_left_arm);
+				
+		Keyframe[] body_twist = new Keyframe[5];
+		body_twist [0] = new Keyframe (0, 0, 0, 0);
+		body_twist [1] = new Keyframe (1, twist_angle.y, 0, 0);
+		body_twist [2] = new Keyframe (3, 0, 0, 0);
+		body_twist [3] = new Keyframe (4, -twist_angle.y, 0, 0);
+		body_twist [4] = new Keyframe (6, 0, 0, 0);
+		body_curve_y = new AnimationCurve (body_twist);
+		
+		Keyframe[] right_leg = new Keyframe[3];
+		right_leg [0] = new Keyframe (3, 0, 0, 0);
+		right_leg [1] = new Keyframe (4, angle.x, 0, 0);
+		right_leg [2] = new Keyframe (6, 0, 0, 0);
+		right_leg_curve_x = new AnimationCurve (right_leg);
+
+		Keyframe[] right_knee = new Keyframe[4];
+		right_knee [0] = new Keyframe (3, 0, 0, 0);
+		right_knee [1] = new Keyframe (4, -angle.x, 0, 0);
+		right_knee [2] = new Keyframe (5, 0, 0, 0);
+		right_knee [3] = new Keyframe (6, 0, 0, 0);
+		right_knee_curve_x = new AnimationCurve (right_knee);
+
+		Keyframe[] right_arm = new Keyframe[1];
+		right_arm [0] = new Keyframe (0, arm_to_side_angle.z, 0, 0);
+		right_arm_down_x = new AnimationCurve (right_arm);
+		
+		Keyframe[] swing_right_arm = new Keyframe[5];
+		swing_right_arm [0] = new Keyframe (0, 0, 0, 0);
+		swing_right_arm [1] = new Keyframe (1, angle.x, 0, 0);
+		swing_right_arm [2] = new Keyframe (3, 0, 0, 0);
+		swing_right_arm [3] = new Keyframe (4, -angle.x, 0, 0);
+		swing_right_arm [4] = new Keyframe (6, 0, 0, 0);
+		right_arm_forward_x = new AnimationCurve (swing_right_arm);
+
+		left_leg_curve_w.AddKey (1, angle.w);
+		left_knee_curve_w.AddKey (1, angle.w);
+		left_arm_down_w.AddKey (0, angle.w);
+		left_arm_forward_w.AddKey (1, angle.w);
+		left_arm_forward_w.AddKey (4, angle.w);
+		body_curve_w.AddKey (1, twist_angle.w);
+
+		right_leg_curve_w.AddKey (4, angle.w);	
+		right_knee_curve_w.AddKey (4, angle.w);
+		right_arm_down_w.AddKey (0, angle.w);
+		right_arm_forward_w.AddKey (1, angle.w);
+		right_arm_forward_w.AddKey (4, angle.w);
+		body_curve_w.AddKey (4, twist_angle.w);
+
+		AnimationClip walk = new AnimationClip ();
+ 
 	
+		walk.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.x", left_leg_curve_x);
+		walk.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.w", left_leg_curve_w);
 
-		left_leg_curve_x.AddKey (0, 0);
-		left_knee_curve_w.AddKey (0, 0);
-	
-		left_leg_curve_y.AddKey (2, 0);
-		left_leg_curve_z.AddKey (2, 0);	
-		left_leg_curve_x.AddKey (2, 45);
-		left_leg_curve_w.AddKey (2, 45);	
+		walk.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.x", left_knee_curve_x);
+		walk.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.w", left_knee_curve_w);
 
-		left_knee_curve_y.AddKey (4, 0);
-		left_knee_curve_z.AddKey (4, 0);
-		left_knee_curve_x.AddKey (4, -45);
-		left_knee_curve_w.AddKey (4, 45);
-	
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.z", left_arm_down_x);
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.w", left_arm_down_w);
 
-		AnimationClip raise_leg = new AnimationClip ();
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.y", left_arm_forward_x);
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.w", left_arm_forward_w);
 
 
-	    raise_leg.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.z", left_leg_curve_z);
-		raise_leg.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.y", left_leg_curve_y);
-		raise_leg.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.x", left_leg_curve_x);
-		raise_leg.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.w", left_leg_curve_w);
+		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.y", body_curve_y);
+		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.w", body_curve_w);
+				
+		walk.SetCurve ("hip bone/right thigh", typeof(Transform), "localRotation.x", right_leg_curve_x);
+		walk.SetCurve ("hip bone/right thigh", typeof(Transform), "localRotation.w", right_leg_curve_w);
+		
+	    walk.SetCurve ("hip bone/right thigh/right knee", typeof(Transform), "localRotation.x", right_knee_curve_x);
+		walk.SetCurve ("hip bone/right thigh/right knee", typeof(Transform), "localRotation.w", right_knee_curve_w);
 
-		raise_leg.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.z", left_knee_curve_z);
-	    raise_leg.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.y", left_knee_curve_y);
-		raise_leg.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.x", left_knee_curve_x);
-		raise_leg.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.w", left_knee_curve_w);
-	
-		animation.AddClip (raise_leg, "walk");
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.z", right_arm_down_x);
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.w", right_arm_down_w);
+		
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.y", right_arm_forward_x);
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.w", right_arm_forward_w);
 
+        animation.AddClip (walk, "walk");
+
+		animation.wrapMode = WrapMode.Loop;
+		animation ["walk"].speed = 2.0f;
 	}
 
 	
@@ -124,7 +230,10 @@ public class Creature : BodyPart
 				segment.AddComponent<SkinnedMeshRenderer>();
 				SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
 				render.material = new Material(Shader.Find("Diffuse"));
-				
+				render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
+				//render.material.mainTexture = main_texture;
+				render.material.color = Color.white;
+
 				if (j == 0)
 				{
 					create_bone(position, body_part, 0.2f, 1.0f, 0.2f);
@@ -293,6 +402,8 @@ public class Creature : BodyPart
 				segment.AddComponent<SkinnedMeshRenderer>();
 				SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
 				render.material = new Material(Shader.Find("Diffuse"));
+				render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
+				render.material.color = Color.white;
 				Matrix4x4[]torso_bindPose = new Matrix4x4[bone.Count];
 				if (j == 0)
 				{
@@ -546,6 +657,8 @@ public class Creature : BodyPart
 				segment.AddComponent<SkinnedMeshRenderer>();
 				SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
 				render.material = new Material(Shader.Find("Diffuse"));
+				render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
+				render.material.color = Color.white;
 				
 				if (j == 0)
 				{
@@ -727,6 +840,8 @@ public class Creature : BodyPart
 			segment.AddComponent<SkinnedMeshRenderer>();
 			SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
 			render.material = new Material(Shader.Find("Diffuse"));
+			render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
+			render.material.color = Color.white;
 			
 			create_mesh(segment);
 			create_bone(position, body_part, 0.1f, 0.1f, 0.1f);
@@ -769,6 +884,8 @@ public class Creature : BodyPart
 			segment.AddComponent<SkinnedMeshRenderer>();
 			SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
 			render.material = new Material(Shader.Find("Diffuse"));
+			render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
+			render.material.color = Color.white;
 			
 			create_mesh(segment);
 			create_bone(position, body_part, 0.1f, 0.1f, 1.0f);
@@ -821,6 +938,9 @@ public class Creature : BodyPart
 		head.AddComponent<SkinnedMeshRenderer>();
 		SkinnedMeshRenderer render = head.GetComponent<SkinnedMeshRenderer>();
 		render.material = new Material(Shader.Find("Diffuse"));
+		render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
+		render.material.color = Color.white;
+
 		
 		Transform[]head_bone = new Transform[1];
 		head_bone[0] = new GameObject("head bone").transform;
@@ -869,7 +989,8 @@ public class Creature : BodyPart
 	void Update()
 	{
 		animation.Play ("walk");
-	}
+
+			}
 }
 
 

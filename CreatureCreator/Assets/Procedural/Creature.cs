@@ -4,12 +4,19 @@ using System.Collections.Generic;
 
 public class Creature : BodyPart
 {
+
+	public int m_NumberOfHeads;
+	public int m_NumberOfPairsOfLegs;
+	public int m_NumberOfPairsOfArms;
+
 	Mesh body_part = new Mesh();
 	GameObject parent;
+	GameObject control = new GameObject();
 	Vector3 position;
+	Vector3 startPoint;
 	Texture main_texture;
 	float move;
-
+	bool key_pressed = false;
 
 	//Transform[] bones = new Transform[;
 	
@@ -19,192 +26,266 @@ public class Creature : BodyPart
 		
 		List<Transform>Bones = new List<Transform>();
 		parent = GameObject.Find("Creature");
-	    Animator animator = parent.AddComponent<Animator> ();
+		Animator animator = parent.AddComponent<Animator> ();
 		//animator.applyRootMotion = true;
 		//animtor.
 		Animation animation = parent.AddComponent<Animation> ();
 		//animation.animatePhysics = true;
 		//animation.
+		if (m_NumberOfHeads > 3) {
+						m_NumberOfHeads = 3;
+				}
 
-		load_legs(parent,Bones, 2);
+		load_legs(parent,Bones, 2, m_NumberOfPairsOfLegs);
 		load_body(parent,Bones, 3);
 		load_arms(parent,Bones, 2);
-		load_neck(parent,Bones, 5);
+		load_neck(parent,Bones, 5, m_NumberOfHeads);
 		load_tail(parent,Bones, 4);
-		load_head(parent,Bones);
-		
-		/*for (int i = 0; i<Bones.Count;i++)
+		load_head(parent,Bones, m_NumberOfHeads);
+
+		/*for int i = 0; i<Bones.Count;i++)
 		{
 			Debug.Log (i);
 			Debug.Log (Bones[i].name);
 		}*/
-		
+
+
+
 		//arrange bones into hirearchy
 		GameObject.Find ("hip bone").transform.parent = GameObject.Find ("Creature").transform;
 		GameObject.Find ("left shoulder").transform.parent = GameObject.Find ("upper spine").transform;
 		GameObject.Find ("right shoulder").transform.parent = GameObject.Find ("upper spine").transform;
-		GameObject.Find ("right knee").transform.parent = GameObject.Find ("right thigh").transform;
-		GameObject.Find ("left knee").transform.parent = GameObject.Find ("left thigh").transform;
-		GameObject.Find ("right thigh").transform.parent = GameObject.Find ("hip bone").transform;
-		GameObject.Find ("left thigh").transform.parent = GameObject.Find ("hip bone").transform;
-		GameObject.Find ("head bone").transform.parent = GameObject.Find ("neck bone").transform;
+
+		for (int i=0; i<m_NumberOfPairsOfLegs; i++) {
+			GameObject.Find ("right knee["+i+"]").transform.parent = GameObject.Find ("right thigh["+i+"]").transform;
+			GameObject.Find ("left knee["+i+"]").transform.parent = GameObject.Find ("left thigh["+i+"]").transform;
+			GameObject.Find ("right thigh["+i+"]").transform.parent = GameObject.Find ("hip bone").transform;
+			GameObject.Find ("left thigh["+i+"]").transform.parent = GameObject.Find ("hip bone").transform;
+		}
+
+		for(int i = 0; i<m_NumberOfHeads; i++){
+		GameObject.Find ("head bone["+i+"]").transform.parent = GameObject.Find ("neck bone["+i+"]").transform;
+		GameObject.Find ("neck bone["+i+"]").transform.parent = GameObject.Find ("upper spine").transform;
+
+		}
+
 		GameObject.Find ("tail 1").transform.parent = GameObject.Find ("lower spine").transform;
-		GameObject.Find ("neck bone").transform.parent = GameObject.Find ("upper spine").transform;
-		
+		control = GameObject.Find ("hip bone");
+		startPoint = control.transform.position;
+	
+
+
+
 		//animation
 		
-		AnimationCurve left_leg_curve_x;
-		AnimationCurve left_leg_curve_w = new AnimationCurve ();
+		float a = 3.14158f / 360;
+		AnimationClip walk = new AnimationClip ();
 		
-		AnimationCurve left_knee_curve_x;
+		//leg
+		float swing_back_x = Mathf.Sin (-20 * a);
+		float swing_back_w = Mathf.Cos (-20 * a);
+		float swing_forth_x = Mathf.Sin (30 * a);
+		float swing_forth_w = Mathf.Cos (30 * a);
+		//left leg
+		AnimationCurve left_leg_curve_x = new AnimationCurve ();
+		AnimationCurve left_leg_curve_w = new AnimationCurve ();
+		left_leg_curve_x.AddKey(0, 0);
+		left_leg_curve_w.AddKey(0, 1);
+		left_leg_curve_x.AddKey(1, swing_forth_x);
+		left_leg_curve_w.AddKey(1, swing_forth_w);
+		left_leg_curve_x.AddKey(2, swing_back_x);
+		left_leg_curve_w.AddKey(2, swing_back_w);
+		left_leg_curve_x.AddKey(3, 0);
+		left_leg_curve_w.AddKey(3, 1);
+		for (int i = 0; i<m_NumberOfPairsOfLegs; i++) {
+			walk.SetCurve ("hip bone/left thigh["+i+"]", typeof(Transform), "localRotation.x", left_leg_curve_x);
+			walk.SetCurve ("hip bone/left thigh["+i+"]", typeof(Transform), "localRotation.w", left_leg_curve_w);
+		}
+
+		//left knee
+		AnimationCurve left_knee_curve_x = new AnimationCurve ();
 		AnimationCurve left_knee_curve_w = new AnimationCurve ();
+		left_knee_curve_x.AddKey (0, 0);
+		left_knee_curve_w.AddKey (0, 1);
+		left_knee_curve_x.AddKey (1, swing_back_x);
+		left_knee_curve_w.AddKey (1, swing_back_w);
+		left_knee_curve_x.AddKey (2, 0);
+		left_knee_curve_w.AddKey (2, 1);
 
-		AnimationCurve right_leg_curve_x;
+		for (int i = 0; i<m_NumberOfPairsOfLegs; i++) {
+			walk.SetCurve ("hip bone/left thigh["+i+"]/left knee["+i+"]", typeof(Transform), "localRotation.x", left_knee_curve_x);
+			walk.SetCurve ("hip bone/left thigh["+i+"]/left knee["+i+"]", typeof(Transform), "localRotation.w", left_knee_curve_w);
+				}
+		//right leg
+		AnimationCurve right_leg_curve_x = new AnimationCurve ();
 		AnimationCurve right_leg_curve_w = new AnimationCurve ();
+		right_leg_curve_x.AddKey(0, 0);
+		right_leg_curve_w.AddKey(0, 1);
+		right_leg_curve_x.AddKey(1, swing_back_x);
+		right_leg_curve_w.AddKey(1, swing_back_w);
+		right_leg_curve_x.AddKey(2, swing_forth_x);
+		right_leg_curve_w.AddKey(2, swing_forth_w);
+		right_leg_curve_x.AddKey(3, 0);
+		right_leg_curve_w.AddKey(3, 1);
 
-		AnimationCurve right_knee_curve_x;
+		for (int i = 0; i<m_NumberOfPairsOfLegs; i++) {
+				walk.SetCurve ("hip bone/right thigh[" + i + "]", typeof(Transform), "localRotation.x", right_leg_curve_x);
+				walk.SetCurve ("hip bone/right thigh[" + i + "]", typeof(Transform), "localRotation.w", right_leg_curve_w);
+				}
+		//right knee
+		AnimationCurve right_knee_curve_x = new AnimationCurve ();
 		AnimationCurve right_knee_curve_w = new AnimationCurve ();
+		right_knee_curve_x.AddKey (0, 0);
+		right_knee_curve_w.AddKey (0, 1);
+		right_knee_curve_x.AddKey (1, 0);
+		right_knee_curve_w.AddKey (1, 1);
+		right_knee_curve_x.AddKey (2, swing_back_x);
+		right_knee_curve_w.AddKey (2, swing_back_w);
+		right_knee_curve_x.AddKey (3, 0);
+		right_knee_curve_w.AddKey (3, 1);
 
-		AnimationCurve body_curve_y;
-		AnimationCurve body_curve_w = new AnimationCurve ();
+		for (int i = 0; i<m_NumberOfPairsOfLegs; i++) {
+				walk.SetCurve ("hip bone/right thigh[" +i+ "]/right knee["+i+"]", typeof(Transform), "localRotation.x", right_knee_curve_x);
+				walk.SetCurve ("hip bone/right thigh["+i+"]/right knee["+i+"]", typeof(Transform), "localRotation.w", right_knee_curve_w);
+				}
+		//torso
+		Quaternion Torso_angle = Quaternion.Euler (0,2,0);
+		Quaternion midTorso_angle = Quaternion.Euler (0, 5, 0);
+		AnimationCurve lowerTorso_x = new AnimationCurve ();
+		AnimationCurve lowerTorso_y = new AnimationCurve ();
+		AnimationCurve lowerTorso_w = new AnimationCurve ();
+		lowerTorso_x.AddKey (0, Mathf.Sin (-5*a));
+		lowerTorso_y.AddKey (0, 0);
+		lowerTorso_w.AddKey (0, 1);
+		lowerTorso_y.AddKey (1, -Torso_angle.y);
+		lowerTorso_w.AddKey (1,Torso_angle.w);
+		lowerTorso_y.AddKey (2, Torso_angle.y);
+		lowerTorso_w.AddKey (2,Torso_angle.w );
+		lowerTorso_y.AddKey (3, 0);
+		lowerTorso_w.AddKey (3, 1);
+	
+		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.x", lowerTorso_x);
+		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.y", lowerTorso_y);
+		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.w", lowerTorso_w);
 
-		AnimationCurve left_arm_down_x;
+		AnimationCurve midTorso_x = new AnimationCurve ();
+		AnimationCurve midTorso_y = new AnimationCurve ();
+		AnimationCurve midTorso_w = new AnimationCurve ();
+		midTorso_x.AddKey (0, Mathf.Sin (-5*a));
+		midTorso_y.AddKey (0, 0);
+		midTorso_w.AddKey (0, 1);
+		midTorso_y.AddKey (1, -Torso_angle.y);
+		midTorso_w.AddKey (1,Torso_angle.w );
+		midTorso_y.AddKey (2, Torso_angle.y);
+		midTorso_w.AddKey (2,Torso_angle.w );
+		midTorso_y.AddKey (3, 0);
+		midTorso_w.AddKey (3, 1);
+		
+		walk.SetCurve ("hip bone/lower spine/mid spine", typeof(Transform), "localRotation.x", midTorso_x);
+		walk.SetCurve ("hip bone/lower spine/mid spine", typeof(Transform), "localRotation.y", midTorso_y);
+		walk.SetCurve ("hip bone/lower spine/mid spine", typeof(Transform), "localRotation.w", midTorso_w);
+		
+		//head
+		Quaternion head_angle = Quaternion.Euler (0, 15, 0);
+		AnimationCurve head_curve_y;
+		Keyframe[] head_y = new Keyframe[4];
+		head_y [0] = new Keyframe (0, 0, 0, 0);
+		head_y [1] = new Keyframe (1, head_angle.y, 0, 0);
+		head_y [2] = new Keyframe (2, -head_angle.y, 0, 0);
+		head_y [3] = new Keyframe (3, 0, 0, 0);
+		head_curve_y = new AnimationCurve (head_y);
+		AnimationCurve head_curve_w;
+		Keyframe[] head_w = new Keyframe[4];
+		head_w [0] = new Keyframe (0, 1, 0, 0);
+		head_w [1] = new Keyframe (1, head_angle.w, 0, 0);
+		head_w [2] = new Keyframe (2, head_angle.w, 0, 0);
+		head_w [3] = new Keyframe (3, 1, 0, 0);
+		head_curve_w = new AnimationCurve (head_w);
+
+		for (int i = 0; i <m_NumberOfHeads; i++) {
+				walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/neck bone["+i+"]/head bone["+i+"]", typeof(Transform), "localRotation.y", head_curve_y);
+				walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/neck bone["+i+"]/head bone["+i+"]", typeof(Transform), "localRotation.w", head_curve_w);
+			}
+		//arms
+		Quaternion arm_to_side_angle = Quaternion.Euler (0, 0, 80);
+		Quaternion angle = Quaternion.Euler (30, 0, 0);
+		
+		AnimationCurve left_arm_down_z;
 		AnimationCurve left_arm_down_w = new AnimationCurve ();
-
+		
 		AnimationCurve left_arm_forward_x;
 		AnimationCurve left_arm_forward_w = new AnimationCurve ();
-
-		AnimationCurve right_arm_down_x;
+		
+		AnimationCurve right_arm_down_z;
 		AnimationCurve right_arm_down_w = new AnimationCurve ();
 		
 		AnimationCurve right_arm_forward_x;
 		AnimationCurve right_arm_forward_w = new AnimationCurve ();
-
-		Quaternion angle = Quaternion.Euler (45, 0, 0);
-		Quaternion twist_angle = Quaternion.Euler (0, 10, 0);
-		Quaternion arm_to_side_angle = Quaternion.Euler (0, 0, 90);
-
-
-		Keyframe[] left_leg = new Keyframe[3];
-		left_leg [0] = new Keyframe (0, 0, 0, 0);
-		left_leg [1] = new Keyframe (1, angle.x, 0, 0);
-		left_leg [2] = new Keyframe (3, 0, 0, 0);
-		left_leg_curve_x = new AnimationCurve (left_leg);
-
-		Keyframe[] left_knee = new Keyframe[4];
-		left_knee [0] = new Keyframe (0, 0, 0, 0);
-		left_knee [1] = new Keyframe (1, -angle.x, 0, 0);
-		left_knee [2] = new Keyframe (2, 0, 0, 0);
-		left_knee [3] = new Keyframe (3, 0, 0, 0);
-		left_knee_curve_x = new AnimationCurve (left_knee);
 		
-		Keyframe[] left_arm = new Keyframe[1];
+		//left arm
+		Keyframe[] left_arm = new Keyframe[2];
 		left_arm [0] = new Keyframe (0, -arm_to_side_angle.z, 0, 0);
-		left_arm_down_x = new AnimationCurve (left_arm);
-
-		Keyframe[] swing_left_arm = new Keyframe[5];
+		left_arm [1] = new Keyframe (1, -arm_to_side_angle.z, 0, 0);
+		left_arm_down_z = new AnimationCurve (left_arm);
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.z", left_arm_down_z);
+		
+		Keyframe[] swing_left_arm = new Keyframe[4];
 		swing_left_arm [0] = new Keyframe (0, 0, 0, 0);
-		swing_left_arm [1] = new Keyframe (1, angle.x, 0, 0);
-		swing_left_arm [2] = new Keyframe (3, 0, 0, 0);
-		swing_left_arm [3] = new Keyframe (4, -angle.x, 0, 0);
-		swing_left_arm [4] = new Keyframe (6, 0, 0, 0);
+		swing_left_arm [1] = new Keyframe (1, -angle.x, 0, 0);
+		swing_left_arm [2] = new Keyframe (2, angle.x, 0, 0);
+		swing_left_arm [3] = new Keyframe (3, 0, 0, 0);
 		left_arm_forward_x = new AnimationCurve (swing_left_arm);
-				
-		Keyframe[] body_twist = new Keyframe[5];
-		body_twist [0] = new Keyframe (0, 0, 0, 0);
-		body_twist [1] = new Keyframe (1, twist_angle.y, 0, 0);
-		body_twist [2] = new Keyframe (3, 0, 0, 0);
-		body_twist [3] = new Keyframe (4, -twist_angle.y, 0, 0);
-		body_twist [4] = new Keyframe (6, 0, 0, 0);
-		body_curve_y = new AnimationCurve (body_twist);
 		
-		Keyframe[] right_leg = new Keyframe[3];
-		right_leg [0] = new Keyframe (3, 0, 0, 0);
-		right_leg [1] = new Keyframe (4, angle.x, 0, 0);
-		right_leg [2] = new Keyframe (6, 0, 0, 0);
-		right_leg_curve_x = new AnimationCurve (right_leg);
-
-		Keyframe[] right_knee = new Keyframe[4];
-		right_knee [0] = new Keyframe (3, 0, 0, 0);
-		right_knee [1] = new Keyframe (4, -angle.x, 0, 0);
-		right_knee [2] = new Keyframe (5, 0, 0, 0);
-		right_knee [3] = new Keyframe (6, 0, 0, 0);
-		right_knee_curve_x = new AnimationCurve (right_knee);
-
-		Keyframe[] right_arm = new Keyframe[1];
-		right_arm [0] = new Keyframe (0, arm_to_side_angle.z, 0, 0);
-		right_arm_down_x = new AnimationCurve (right_arm);
-		
-		Keyframe[] swing_right_arm = new Keyframe[5];
-		swing_right_arm [0] = new Keyframe (0, 0, 0, 0);
-		swing_right_arm [1] = new Keyframe (1, angle.x, 0, 0);
-		swing_right_arm [2] = new Keyframe (3, 0, 0, 0);
-		swing_right_arm [3] = new Keyframe (4, -angle.x, 0, 0);
-		swing_right_arm [4] = new Keyframe (6, 0, 0, 0);
-		right_arm_forward_x = new AnimationCurve (swing_right_arm);
-
-		left_leg_curve_w.AddKey (1, angle.w);
-		left_knee_curve_w.AddKey (1, angle.w);
-		left_arm_down_w.AddKey (0, angle.w);
+		left_arm_forward_w.AddKey (0, 1);
 		left_arm_forward_w.AddKey (1, angle.w);
-		left_arm_forward_w.AddKey (4, angle.w);
-		body_curve_w.AddKey (1, twist_angle.w);
-
-		right_leg_curve_w.AddKey (4, angle.w);	
-		right_knee_curve_w.AddKey (4, angle.w);
-		right_arm_down_w.AddKey (0, angle.w);
-		right_arm_forward_w.AddKey (1, angle.w);
-		right_arm_forward_w.AddKey (4, angle.w);
-		body_curve_w.AddKey (4, twist_angle.w);
-
-		AnimationClip walk = new AnimationClip ();
- 
-	
-		walk.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.x", left_leg_curve_x);
-		walk.SetCurve ("hip bone/left thigh", typeof(Transform), "localRotation.w", left_leg_curve_w);
-
-		walk.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.x", left_knee_curve_x);
-		walk.SetCurve ("hip bone/left thigh/left knee", typeof(Transform), "localRotation.w", left_knee_curve_w);
-
-		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.z", left_arm_down_x);
-		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.w", left_arm_down_w);
-
+		left_arm_forward_w.AddKey (3, 1);
+		
 		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.y", left_arm_forward_x);
 		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/left shoulder", typeof(Transform), "localRotation.w", left_arm_forward_w);
-
-
-		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.y", body_curve_y);
-		walk.SetCurve ("hip bone/lower spine", typeof(Transform), "localRotation.w", body_curve_w);
-				
-		walk.SetCurve ("hip bone/right thigh", typeof(Transform), "localRotation.x", right_leg_curve_x);
-		walk.SetCurve ("hip bone/right thigh", typeof(Transform), "localRotation.w", right_leg_curve_w);
 		
-	    walk.SetCurve ("hip bone/right thigh/right knee", typeof(Transform), "localRotation.x", right_knee_curve_x);
-		walk.SetCurve ("hip bone/right thigh/right knee", typeof(Transform), "localRotation.w", right_knee_curve_w);
-
-		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.z", right_arm_down_x);
-		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.w", right_arm_down_w);
+		//right arm
+		Keyframe[] right_arm = new Keyframe[2];
+		right_arm [0] = new Keyframe (0, arm_to_side_angle.z, 0, 0);
+		right_arm [1] = new Keyframe (1, arm_to_side_angle.z, 0, 0);
+		right_arm_down_z = new AnimationCurve (right_arm);
+		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.z", right_arm_down_z);
+		
+		Keyframe[] swing_right_arm = new Keyframe[4];
+		swing_right_arm [0] = new Keyframe (0, 0, 0, 0);
+		swing_right_arm [1] = new Keyframe (1, -angle.x, 0, 0);
+		swing_right_arm [2] = new Keyframe (2, angle.x, 0, 0);
+		swing_right_arm [3] = new Keyframe (3, 0, 0, 0);
+		right_arm_forward_x = new AnimationCurve (swing_right_arm);
+		
+		right_arm_forward_w.AddKey (0, 1);
+		right_arm_forward_w.AddKey (1, angle.w);
+		right_arm_forward_w.AddKey (3, 1);
 		
 		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.y", right_arm_forward_x);
 		walk.SetCurve ("hip bone/lower spine/mid spine/upper spine/right shoulder", typeof(Transform), "localRotation.w", right_arm_forward_w);
-
-        animation.AddClip (walk, "walk");
-
+		
+		animation.AddClip (walk, "walk");
+		
 		animation.wrapMode = WrapMode.Loop;
 		animation ["walk"].speed = 2.0f;
 	}
-
 	
-	void load_legs(GameObject obj,List<Transform>bone,int number_of_segments)
+	
+	void load_legs(GameObject obj,List<Transform>bone,int number_of_segments, int leg_pairs)
 	{
 		position = new Vector3(-0.1f, 0.0f, 0.3f);
 		GameObject legs = new GameObject("Legs");
 		legs.transform.parent = obj.transform;
 		
 		GameObject section = gameObject;
-		
+
 		int number_of_legs = 2;
-		
+		int number_of_leg_pairs = leg_pairs;
+
+		for(int pairs = 0; pairs < number_of_leg_pairs; pairs++){
+			GameObject leg_pair = new GameObject("Pair["+pairs+"]");
+			leg_pair.transform.parent = legs.transform;
+
 		for (int i = 0; i < number_of_legs; i++)
 		{
 			position.y = 0.0f;
@@ -213,13 +294,13 @@ public class Creature : BodyPart
 			if (i == 0)
 			{
 				section = new GameObject("Left Leg");
-				section.transform.parent = legs.transform;
+				section.transform.parent = leg_pair.transform;
 			}
 			
 			if (i == 1)
 			{
 				section = new GameObject("Right Leg");
-				section.transform.parent = legs.transform;
+				section.transform.parent = leg_pair.transform;
 			}
 			
 			for (int j = 0; j < number_of_segments; j++)
@@ -233,7 +314,7 @@ public class Creature : BodyPart
 				render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
 				//render.material.mainTexture = main_texture;
 				render.material.color = Color.white;
-
+				
 				if (j == 0)
 				{
 					create_bone(position, body_part, 0.2f, 1.0f, 0.2f);
@@ -252,18 +333,18 @@ public class Creature : BodyPart
 					{	
 						
 						GameObject ankle = GameObject.Find ("ankle");
-						ankle.name = "right angkle";
+						ankle.name = "right ankle["+pairs+"]";
 						leg_bones[0].localPosition = new Vector3(position.x+0.1f,position.y+1.0f,position.z+0.15f);
 						GameObject knee = GameObject.Find ("knee");
-						knee.name = "right knee";
+							knee.name = "right knee["+pairs+"]";
 					}
 					if(i == 1)
 					{	
 						GameObject ankle = GameObject.Find ("ankle");
-						ankle.name = "left ankle";
+						ankle.name = "left ankle["+pairs+"]";
 						leg_bones[0].localPosition = new Vector3(position.x+0.1f,position.y+1.0f,position.z+0.15f);
 						GameObject knee = GameObject.Find ("knee");
-						knee.name = "left knee";
+							knee.name = "left knee["+pairs+"]";
 					}
 					
 					bone.Add(leg_bones[0]);
@@ -303,13 +384,13 @@ public class Creature : BodyPart
 					if(i == 0)
 					{	
 						thigh_bone[0].localPosition = new Vector3(position.x+0.1f,position.y+1.0f,position.z+0.15f);
-						GameObject.Find ("thigh").name = "right thigh";
+						GameObject.Find ("thigh").name = "right thigh["+pairs+"]";
 					}
 					if(i == 1)
 					{	
 						thigh_bone[0].localPosition = new Vector3(position.x+0.1f,position.y+1.0f,position.z+0.15f);
 						GameObject thigh = GameObject.Find ("thigh");
-						thigh.name = "left thigh";
+							thigh.name = "left thigh["+pairs+"]";
 					}
 					
 					bone.Add(thigh_bone[0]);
@@ -338,6 +419,9 @@ public class Creature : BodyPart
 			}   
 			position.x += 0.7f;
 		}
+			position.x = -0.1f;
+			position.z += 0.5f;
+		}
 	}
 	
 	void load_body(GameObject obj,List<Transform>bone, int number_of_segments)
@@ -349,12 +433,16 @@ public class Creature : BodyPart
 		GameObject section = gameObject;
 		int number_of_sections = 3; //upper, mid, lower torso
 		float size = 0.0f;
+		int number_of_parts = 0;
+		float length = 0.25f;
 		
 		//create spine bones
 		Transform[] spine = new Transform[4];
 		spine[0] = new GameObject("hip bone").transform;
-		spine[0].localPosition = new Vector3(position.x+0.25f, position.y, position.z+0.25f);
+		spine[0].localPosition = new Vector3(position.x+0.25f, position.y, position.z + 0.25f);
 		spine[0].localRotation = Quaternion.identity;
+	
+
 		spine[1] = new GameObject("lower spine").transform;
 		spine[1].localPosition = new Vector3(position.x+0.25f, position.y+1.0f, position.z+0.25f);
 		spine[1].localRotation = Quaternion.identity;
@@ -367,6 +455,7 @@ public class Creature : BodyPart
 		spine[3].parent = spine[2];
 		spine[2].parent = spine[1];
 		spine[1].parent = spine[0];
+
 		for(int k = 0; k < spine.Length; k++){bone.Add(spine[k]);}
 		
 		for (int i = 0; i < number_of_sections; i++)
@@ -376,6 +465,7 @@ public class Creature : BodyPart
 				section = new GameObject("Lower Torso");
 				section.transform.parent = body.transform;
 				size = 0.5f;
+				number_of_parts = m_NumberOfPairsOfLegs;
 			}
 			
 			if (i == 1)
@@ -384,6 +474,7 @@ public class Creature : BodyPart
 				section.transform.parent = body.transform;
 				position.x -= 0.15f;
 				size = 0.8f;
+				number_of_parts = 1;
 			}
 			
 			if (i == 2)
@@ -391,13 +482,18 @@ public class Creature : BodyPart
 				section = new GameObject("Upper Torso");
 				section.transform.parent = body.transform;
 				size = 0.5f;
-				
+				number_of_parts = 1;
+
 			}
-			
+
+			for (int parts = 0; parts < number_of_parts; parts++){
+				GameObject part = new GameObject("Part["+parts+"]");
+				part.transform.parent = section.transform;
+
 			for (int j = 0; j < number_of_segments; j++)
 			{
 				GameObject segment = new GameObject("Segment: " + (j + 1));
-				segment.transform.parent = section.transform;
+				segment.transform.parent = part.transform;
 				create_mesh(segment);
 				segment.AddComponent<SkinnedMeshRenderer>();
 				SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
@@ -611,8 +707,13 @@ public class Creature : BodyPart
 				{
 					position.x -= size +0.4f;
 				}
+						
 			}
 			position.x = 0.1f;
+			position.z += 0.5f;
+		}
+			position.x = 0.1f;
+			position.z = 0.0f;
 			position.y = body_part.bounds.max.y;
 		}
 	}
@@ -620,8 +721,8 @@ public class Creature : BodyPart
 	void load_arms(GameObject obj, List<Transform>bone,int number_of_segments)
 	{
 		
-		GameObject right_upper_torso = GameObject.Find("Upper Torso/Segment: 3");
-		GameObject left_upper_torso = GameObject.Find("Upper Torso/Segment: 2");
+		GameObject right_upper_torso = GameObject.Find("Upper Torso/Part[0]/Segment: 3");
+		GameObject left_upper_torso = GameObject.Find("Upper Torso/Part[0]/Segment: 2");
 		position.y = (right_upper_torso.renderer.bounds.max.y + right_upper_torso.renderer.bounds.min.y)/2;
 		
 		
@@ -818,51 +919,84 @@ public class Creature : BodyPart
 		}
 	}
 	
-	void load_neck(GameObject obj, List<Transform>bone,int number_of_segments)
+	void load_neck(GameObject obj, List<Transform>bone,int number_of_segments, int heads)
 	{
-		GameObject mid_upper_torso = GameObject.Find("Upper Torso/Segment: 1");
+		for (int i= 0; i<heads; i++) {
+						Transform[] neck_bone = new Transform[1];
+						neck_bone [0] = new GameObject ("neck bone[" + i + "]").transform;
+						neck_bone [0].localRotation = Quaternion.identity;
+						neck_bone [0].localPosition = new Vector3 (position.x - 0.05f, position.y, position.z - 0.05f);
+						neck_bone [0].localPosition = new Vector3 (0.05f, position.y, 0.05f);
+						bone.Add (neck_bone [0]);
+				}
+
+		GameObject mid_upper_torso = GameObject.Find("Upper Torso/Part[0]/Segment: 1");
+
+
+
 		position.y = mid_upper_torso.renderer.bounds.max.y;
-		position.x = 0.3f;
-		position.z = (mid_upper_torso.renderer.bounds.max.z + mid_upper_torso.renderer.bounds.min.z) / 2;
+		if (heads > 1) {
+						position.x = 0.8f;
+				} else
+						position.x = 0.3f;
+
+		position.z = (mid_upper_torso.renderer.bounds.max.z + mid_upper_torso.renderer.bounds.min.z) / 2 - 0.2f;
 		
 		GameObject neck = new GameObject("Neck");
 		neck.transform.parent = obj.transform;
-		Transform[] neck_bone = new Transform[1];
-		neck_bone [0] = new GameObject ("neck bone").transform;
-		neck_bone [0].localRotation = Quaternion.identity;
-		neck_bone [0].localPosition = new Vector3 (position.x - 0.05f, position.y, position.z - 0.05f);
-		bone.Add (neck_bone [0]);
-		
-		for (int j = 0; j < number_of_segments; j++)
-		{
-			GameObject segment = new GameObject("Segment: " + (j + 1));
-			segment.transform.parent = neck.transform;
-			segment.AddComponent<SkinnedMeshRenderer>();
-			SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer>();
-			render.material = new Material(Shader.Find("Diffuse"));
-			render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
-			render.material.color = Color.white;
+
+		for (int number_of_heads = 0; number_of_heads< heads; number_of_heads++) {
+			GameObject neck1 = new GameObject("Neck["+number_of_heads+"]");
+			neck1.transform.parent = neck.transform;
+
+
+						for (int j = 0; j < number_of_segments; j++) {
+								GameObject segment = new GameObject ("Segment: " + (j + 1));
+								segment.transform.parent = neck1.transform;
+								segment.AddComponent<SkinnedMeshRenderer> ();
+								SkinnedMeshRenderer render = segment.GetComponent<SkinnedMeshRenderer> ();
+								render.material = new Material (Shader.Find ("Diffuse"));
+								render.material.mainTexture = Resources.Load<Texture2D> ("Cheetah_fur");
+								render.material.color = Color.white;
 			
-			create_mesh(segment);
-			create_bone(position, body_part, 0.1f, 0.1f, 0.1f);
+								create_mesh (segment);
+								create_bone (position, body_part, 0.1f, 0.1f, 0.1f);
 			
-			BoneWeight[]neck_weight = new BoneWeight[body_part.vertexCount];
-			for(int k = 0; k<body_part.vertexCount;k++)
-			{
-				neck_weight[k].boneIndex0 = bone.Count-1;
-				neck_weight[k].weight0=1;
+
+			
+
+								BoneWeight[] neck_weight = new BoneWeight[body_part.vertexCount];
+								for (int k = 0; k<body_part.vertexCount; k++) {
+										neck_weight [k].boneIndex0 = bone.Count - 1;
+										neck_weight [k].weight0 = 1;
+								}
+								body_part.boneWeights = neck_weight;
+								Matrix4x4[] neck_bindPose = new Matrix4x4[bone.Count];
+								prepare_skinMesh (segment, neck_bindPose, bone, body_part, render);
+								
+								position.y = body_part.bounds.max.y;
+						} 
+
+				
+
+
+			position.y = mid_upper_torso.renderer.bounds.max.y;
+
+			if(heads > 2){
+				
+				position.x -= 0.5f;
+
+			if(number_of_heads == 1){position.z -= 0.5f;}
+			else position.z += 0.5f;
 			}
-			body_part.boneWeights = neck_weight;
-			Matrix4x4[] neck_bindPose = new Matrix4x4[bone.Count];
-			prepare_skinMesh(segment,neck_bindPose,bone,body_part,render);
-			position.y = body_part.bounds.max.y;
-		}  
-		
+
+			else position.x -= 1.0f;
+		}
 	}
 	
 	void load_tail(GameObject obj, List<Transform>bone,int number_of_segments)
 	{
-		GameObject mid_lower_torso = GameObject.Find("Lower Torso/Segment: 1");
+		GameObject mid_lower_torso = GameObject.Find("Lower Torso/Part["+(m_NumberOfPairsOfLegs-1)+"]/Segment: 1");
 		position.y = (mid_lower_torso.renderer.bounds.max.y + mid_lower_torso.renderer.bounds.min.y) / 2;
 		position.x = (mid_lower_torso.renderer.bounds.max.x + mid_lower_torso.renderer.bounds.min.x) / 2;
 		position.z = mid_lower_torso.renderer.bounds.max.z;
@@ -926,38 +1060,43 @@ public class Creature : BodyPart
 		}   
 	}
 	
-	void load_head(GameObject obj,List<Transform>bone)
+	void load_head(GameObject obj,List<Transform>bone, int heads)
 	{
-		GameObject neck = GameObject.Find("Neck/Segment: 4");
-		position.y = neck.renderer.bounds.max.y;
-		position.x = 0.2f;
-		position.z = neck.renderer.bounds.max.z;
-		
-		GameObject head = new GameObject("Head");
+		GameObject head = new GameObject ("Head");
 		head.transform.parent = obj.transform;
-		head.AddComponent<SkinnedMeshRenderer>();
-		SkinnedMeshRenderer render = head.GetComponent<SkinnedMeshRenderer>();
-		render.material = new Material(Shader.Find("Diffuse"));
-		render.material.mainTexture = Resources.Load<Texture2D>("Cheetah_fur");
-		render.material.color = Color.white;
 
+				for (int i =0; i<heads; i++) {
+						GameObject neck = GameObject.Find ("Neck/Neck["+i+"]/Segment: 5");
+						position.y = neck.renderer.bounds.max.y;
+						position.x = neck.renderer.bounds.max.x - 0.2f;
+						position.z = neck.renderer.bounds.max.z;
 		
-		Transform[]head_bone = new Transform[1];
-		head_bone[0] = new GameObject("head bone").transform;
-		head_bone [0].localRotation = Quaternion.identity;
-		head_bone [0].localPosition = new Vector3 (position.x + 0.15f, position.y + 0.1f, position.z - 0.1f);
-		bone.Add (head_bone [0]);
-		create_mesh(head);
-		create_head(position, body_part, 0.3f, 0.2f, -1.0f);
-		BoneWeight[]head_weight = new BoneWeight[body_part.vertexCount];
-		for(int k = 0; k<body_part.vertexCount;k++)
-		{
-			head_weight[k].boneIndex0 = bone.Count-1;
-			head_weight[k].weight0=1;
-		}
-		body_part.boneWeights = head_weight;
-		Matrix4x4[] head_bindPose = new Matrix4x4[bone.Count];
-		prepare_skinMesh(head,head_bindPose,bone,body_part,render);
+						GameObject head1 = new GameObject ("Head["+i+"]");
+						head1.transform.parent = head.transform;
+						head1.AddComponent<SkinnedMeshRenderer> ();
+						SkinnedMeshRenderer render = head1.GetComponent<SkinnedMeshRenderer> ();
+						render.material = new Material (Shader.Find ("Diffuse"));
+						render.material.mainTexture = Resources.Load<Texture2D> ("Cheetah_fur");
+						render.material.color = Color.white;
+		
+		
+						Transform[] head_bone = new Transform[1];
+						head_bone [0] = new GameObject ("head bone["+i+"]").transform;
+						head_bone [0].localRotation = Quaternion.identity;
+						head_bone [0].localPosition = new Vector3 (position.x + 0.15f, position.y + 0.1f, position.z - 0.1f);
+						bone.Add (head_bone [0]);
+						create_mesh (head1);
+						create_head (position, body_part, 0.3f, 0.2f, -1.0f);
+						BoneWeight[] head_weight = new BoneWeight[body_part.vertexCount];
+						for (int k = 0; k<body_part.vertexCount; k++) {
+								head_weight [k].boneIndex0 = bone.Count - 1;
+								head_weight [k].weight0 = 1;
+						}
+						body_part.boneWeights = head_weight;
+						Matrix4x4[] head_bindPose = new Matrix4x4[bone.Count];
+						prepare_skinMesh (head1, head_bindPose, bone, body_part, render);
+				}
+
 	}
 	
 	
@@ -988,9 +1127,22 @@ public class Creature : BodyPart
 	
 	void Update()
 	{
-		animation.Play ("walk");
-
-			}
+		
+		//control.transform.Translate(0,0,-Time.deltaTime*2);
+		
+		if (Input.GetButtonDown("Jump"))
+		{
+			key_pressed = !key_pressed;
+			animation.Stop();
+		}   
+		
+		if(!key_pressed)
+		{
+			animation.Play ("walk");
+			control.transform.Translate(0,0,-Time.deltaTime*2);
+			//control.transform.position = new Vector3(control.transform.position.x,control.transform.position.y,0);
+		}	
+	}
 }
 
 

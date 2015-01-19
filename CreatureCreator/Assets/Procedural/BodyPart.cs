@@ -555,8 +555,8 @@ public class BodyPart : MonoBehaviour
 	// Bottom
 	p0, p1, p2, p3,
     
-    //arch back
-    p10, p11, p2, p3,
+    //arch bottom
+    p3, p2, p11, p10,
  	
     // Right
 	p5, p6, p2, p1,
@@ -564,8 +564,8 @@ public class BodyPart : MonoBehaviour
     //arch right
     p9, p11, p2, p6,
 
-    //arch top
-    p8, p9, p10, p11,
+    //arch back
+    p10, p11, p9, p8,
 
     //arch left
     p8, p7, p3, p10,
@@ -579,8 +579,11 @@ public class BodyPart : MonoBehaviour
     // Top
 	p7, p6, p5, p4,
 
-	//arch front
+	//arch top
 	p6, p7, p8, p9,
+
+	//arch front
+	p6, p7, p3, p2,
 
 	// Back
 	p6, p7, p3, p2,
@@ -611,9 +614,9 @@ public class BodyPart : MonoBehaviour
 			//arch right
 			right, right, right, right,
 			
-			//arch top
-			up, up, up, up,
-			
+			//arch back
+			back, back, back, back,
+
 			//arch left
 			left, left, left, left,
 			
@@ -624,6 +627,9 @@ public class BodyPart : MonoBehaviour
 			front, front, front, front,
 			
 			// Top
+			up, up, up, up,
+
+			//arch top
 			up, up, up, up,
 			
 			//arch front
@@ -669,6 +675,8 @@ public class BodyPart : MonoBehaviour
 
     _11, _01, _00, _10,
 
+	_11, _01, _00, _10,
+
     _11, _01, _00, _10,
 };
        #endregion
@@ -708,49 +716,11 @@ public class BodyPart : MonoBehaviour
 	39, 38, 37,
 
 	43, 42, 40,
-	43, 41, 42,
+	43, 42, 41,
 
- /*
-	// Left
-	3 + 4 * 1, 1 + 4 * 1, 0 + 4 * 1,
-	3 + 4 * 1, 2 + 4 * 1, 1 + 4 * 1,
- 
-	// Front
-	3 + 4 * 2, 1 + 4 * 2, 0 + 4 * 2,
-	3 + 4 * 2, 2 + 4 * 2, 1 + 4 * 2,
- 
-	// Back
-	3 + 4 * 3, 1 + 4 * 3, 0 + 4 * 3,
-	3 + 4 * 3, 2 + 4 * 3, 1 + 4 * 3,
- 
-	// Right
-	3 + 4 * 4, 1 + 4 * 4, 0 + 4 * 4,
-	3 + 4 * 4, 2 + 4 * 4, 1 + 4 * 4,
- 
-	// Top
-	3 + 4 * 5, 1 + 4 * 5, 0 + 4 * 5,
-	3 + 4 * 5, 2 + 4 * 5, 1 + 4 * 5,
+	47, 45, 44,
+	47, 46, 45,
 
-    //arch top
-    3 + 4 * 6, 1 + 4 * 6, 0 + 4 * 6,
-	3 + 4 * 6, 2 + 4 * 6, 1 + 4 * 6,
-
-    //arch left
-    3 + 4 * 7, 1 + 4 * 7, 0 + 4 * 7,
-	3 + 4 * 7, 2 + 4 * 7, 1 + 4 * 7,
-
-    //arch right
-    3 + 4 * 8, 1 + 4 * 8, 0 + 4 * 8,
-	3 + 4 * 8, 2 + 4 * 8, 1 + 4 * 8,
-
-    //arch front
-    3 + 4 * 9, 1 + 4 * 9, 0 + 4 * 9,
-	3 + 4 * 9, 2 + 4 * 9, 1 + 4 * 9,
-
-    //arch back
- 	3 + 4 * 10, 1 + 4 * 10, 0 + 4 * 10,
-	3 + 4 * 10, 2 + 4 * 10, 1 + 4 * 10,
-*/
 };
        #endregion
 
@@ -1158,4 +1128,6 @@ public class BodyPart : MonoBehaviour
 
    }
 
+
+	
 }

@@ -30,6 +30,10 @@ public class Creature : BodyPart
 		//animator.applyRootMotion = true;
 		//animtor.
 		Animation animation = parent.AddComponent<Animation> ();
+
+
+	
+		//sphere.transform.parent = parent.transform;
 		//animation.animatePhysics = true;
 		//animation.
 		if (m_NumberOfHeads > 3) {
@@ -48,6 +52,7 @@ public class Creature : BodyPart
 			Debug.Log (i);
 			Debug.Log (Bones[i].name);
 		}*/
+
 
 
 
@@ -73,6 +78,15 @@ public class Creature : BodyPart
 		control = GameObject.Find ("hip bone");
 		startPoint = control.transform.position;
 	
+		//physics
+		GameObject creature = GameObject.Find ("hip bone");
+		Rigidbody rigid = creature.AddComponent<Rigidbody> ();
+		
+		SphereCollider sphere = creature.AddComponent<SphereCollider> ();
+
+
+		sphere.center = new Vector3 (0, 1.0f, 3.5f);
+		sphere.radius = 4.2f;
 
 
 
@@ -1139,8 +1153,9 @@ public class Creature : BodyPart
 		if(!key_pressed)
 		{
 			animation.Play ("walk");
+
 			control.transform.Translate(0,0,-Time.deltaTime*2);
-			//control.transform.position = new Vector3(control.transform.position.x,control.transform.position.y,0);
+		//control.transform.position = new Vector3(control.transform.position.x,control.transform.position.y,0);
 		}	
 	}
 }
